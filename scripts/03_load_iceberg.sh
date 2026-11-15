@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Loads $DATA_DIR/sf$SCALE/lineitem into the Iceberg table lake.tpch.lineitem with plain Spark
-# (no Comet), prints the schema and checks the row count against the TPC-H reference.
+# (no Comet) and checks the row count against the TPC-H reference.
 # Skipped when the table already holds this scale factor.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -8,7 +8,7 @@ source ./env.sh
 source scripts/lib.sh
 
 MARKER="$WAREHOUSE/lineitem.scale"
-if [ "$(cat "$MARKER" 2>/dev/null || true)" = "$SCALE" ] && [ "${FORCE_DATA:-0}" != "1" ]; then
+if [ "$(cat "$MARKER" 2>/dev/null || true)" = "$SCALE" ]; then
   echo "== lake.tpch.lineitem already loaded at SF $SCALE"
   exit 0
 fi

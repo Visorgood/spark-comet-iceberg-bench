@@ -4,8 +4,8 @@
 # runs differ only by the lines in run_args(). The Iceberg runtime jar is already on
 # Spark's classpath in the image; the Comet jar is added only to Comet runs.
 
-# Directory for the outputs of the current machine and scale factor.
-out_dir() { echo "$OUT_DIR/$MACHINE_ID/sf$SCALE"; }
+# Directory for the outputs of the current scale factor.
+out_dir() { echo "$OUT_DIR/sf$SCALE"; }
 
 base_args() {
   ARGS=(
@@ -43,29 +43,21 @@ comet_args() {
     --conf "spark.executor.extraClassPath=$COMET_JAR"
     --conf spark.plugins=org.apache.spark.CometPlugin
     --conf spark.shuffle.manager=org.apache.spark.sql.comet.execution.shuffle.CometShuffleManager
+    --conf spark.comet.write.iceberg.enabled=true
     --conf spark.comet.explain.fallback.enabled=true
     --conf spark.sql.extendedExplainProviders=org.apache.comet.ExtendedExplainInfo
   )
 }
 
-# Sets ARGS and QUERY for one run id. See README, "Run matrix".
+# Sets ARGS and QUERY for one run. See README, "What runs".
 run_args() {
   base_args
   QUERY="$BENCH_ROOT/sql/insert.sql"
   case "$1" in
-    A)  ;;                                                    # Spark only
-    A1) ARGS+=(--conf spark.sql.shuffle.orderIndependentChecksum.enabled=false) ;;
-    AF) QUERY="$BENCH_ROOT/sql/insert_breaker.sql" ;;         # Spark only, with the breaker
-    B)  comet_args || return 1 ;;                             # Comet defaults: iceberg-java writes
-    C)  comet_args || return 1
-        ARGS+=(--conf spark.comet.write.iceberg.enabled=true) ;;
-    D)  comet_args || return 1
-        ARGS+=(--conf spark.comet.write.iceberg.enabled=true --conf spark.comet.shuffle.mode=jvm) ;;
-    E)  comet_args || return 1
-        ARGS+=(--conf spark.comet.write.iceberg.enabled=true --conf spark.comet.shuffle.enabled=false) ;;
-    F)  comet_args || return 1
-        ARGS+=(--conf spark.comet.write.iceberg.enabled=true)
-        QUERY="$BENCH_ROOT/sql/insert_breaker.sql" ;;
-    *)  echo "Unknown run id: $1 (use A, A1, AF, B, C, D, E, F)" >&2; return 1 ;;
+    spark)          ;;
+    comet)          comet_args || return 1 ;;
+    comet-fallback) comet_args || return 1
+                    QUERY="$BENCH_ROOT/sql/insert_breaker.sql" ;;
+    *) echo "Unknown run: $1 (use spark, comet or comet-fallback)" >&2; return 1 ;;
   esac
 }

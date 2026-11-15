@@ -3,7 +3,7 @@
 
 Builds the SELECT part of the blog query twice (Spark SQL text and DataFrame
 calls), prints both physical plans with expression ids normalised, and a diff.
-An empty diff is the evidence for section 7 of the draft.
+An empty diff means the choice of API does not change what Spark (and Comet) execute.
 """
 import argparse
 import difflib

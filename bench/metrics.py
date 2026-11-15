@@ -10,7 +10,7 @@ metrics of all stages that ran for it and writes:
   <run>/stages_iter1.csv   one row per stage of the first measured iteration
   <run>/accumulables_iter1.csv  every named accumulator per stage (Comet metrics too)
   <run>/final_plan_iter1.txt    the final (post-AQE) physical plan of iter1
-  summary.csv              per run: medians over measured iterations, and ratios to run A
+  summary.csv              per run: medians over measured iterations, and ratios to the spark run
 
 Standard library only. Event logs must be uncompressed and not rolled
 (spark.eventLog.compress=false, spark.eventLog.rolling.enabled=false).
@@ -206,12 +206,12 @@ def main():
                 s[col] = round(statistics.median(vals), 3) if vals else None
             summary.append(s)
         print(f"{run}: {len(rows)} executions -> {run_dir}/iterations.csv")
-    base = next((s for s in summary if s["run"] == "A"), None)
+    base = next((s for s in summary if s["run"] == "spark"), None)
     if base:
         for s in summary:
             for col in ("wall_s", "executor_cpu_s", "jvm_gc_s", "shuffle_write_bytes"):
                 if base.get(col) and s.get(col) is not None:
-                    s[f"{col}_vs_A"] = round(s[col] / base[col], 3)
+                    s[f"{col}_vs_spark"] = round(s[col] / base[col], 3)
     write_csv(results / "summary.csv", summary)
     if summary:
         print(f"summary -> {results / 'summary.csv'}")

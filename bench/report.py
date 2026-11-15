@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build the HTML report served on port 8000 from the outputs in $WORK/out.
+"""Build the HTML report served on port 8000 from the outputs in $WORK/out/sf$SCALE.
 
-One page: machine and versions, a table of runs (median wall time, ratio to Spark,
-CPU, GC, shuffle bytes, result check), bars of wall time, plans side by side for the
-comparisons the blog post makes, Comet's fallback reasons, the SQL vs DataFrame diff,
-links to the Spark UI of every run and to the flame graphs. Standard library only.
+One page: environment, a table of runs (median wall time, ratio to Spark, CPU, GC,
+shuffle bytes, result check, link to the Spark UI), plans side by side, each run's
+plan and Comet's fallback notes, the SQL vs DataFrame plan diff, and a copy of all
+raw output files. Standard library only.
 """
 import csv
 import html
@@ -12,20 +12,13 @@ import os
 import pathlib
 import shutil
 
-DESCRIPTIONS = {
-    "A": "Spark only: the baseline",
-    "A1": "Spark only, per-row shuffle checksum off",
-    "AF": "Spark only, with the assert_true guard (baseline for F)",
-    "B": "Spark + Comet, defaults: iceberg-java writes the files",
-    "C": "Spark + Comet, native Iceberg write: Arrow from file to file",
-    "D": "C with Comet's JVM columnar shuffle",
-    "E": "C with Spark's shuffle between Comet stages",
-    "F": "C with the assert_true guard: one fallback mid-stage",
+RUNS = {
+    "spark": "Spark only",
+    "comet": "Spark + Comet: native Iceberg scan, operators, shuffle and Iceberg write",
+    "comet-fallback": "As comet, plus a data-quality guard (assert_true) that Comet hands back to Spark",
 }
-ORDER = ["A", "A1", "AF", "B", "C", "D", "E", "F"]
-COMPARISONS = [("A", "C", "Spark vs Comet end to end"),
-               ("B", "C", "Comet: iceberg-java writer vs native write"),
-               ("C", "F", "Comet: without and with a fallback mid-stage")]
+COMPARISONS = [("spark", "comet", "Spark vs Spark + Comet"),
+               ("comet", "comet-fallback", "Comet without and with one operator that falls back to Spark")]
 CSS = """
 body{font:14px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;margin:24px auto;max-width:1200px;padding:0 16px;color:#1f2328}
 h1{font-size:22px}h2{font-size:17px;margin-top:32px;border-bottom:1px solid #d0d7de;padding-bottom:4px}
@@ -68,76 +61,75 @@ def num(v, digits=2):
 
 def main():
     work = pathlib.Path(os.environ.get("WORK", "/work"))
-    machine, scale = os.environ["MACHINE_ID"], os.environ["SCALE"]
-    out = work / "out" / machine / f"sf{scale}"
+    scale = os.environ["SCALE"]
+    out = work / "out" / f"sf{scale}"
     report = pathlib.Path(os.environ.get("REPORT_DIR", work / "report"))
     report.mkdir(parents=True, exist_ok=True)
 
     summary = {r["run"]: r for r in read_csv(out / "summary.csv")}
-    runs = [r for r in ORDER if r in summary]
+    runs = [r for r in RUNS if r in summary]
     parts = [f"<!doctype html><meta charset=utf-8><title>Spark vs Comet, SF {html.escape(scale)}</title>",
              f"<style>{CSS}</style>",
-             f"<h1>Spark vs Spark + Comet: Iceberg to Iceberg, TPC-H SF {html.escape(scale)}</h1>"]
-    parts.append("<div class=cols><pre>" + html.escape(text(work / "out" / machine / "machine.txt")) +
-                 "</pre><pre>" + html.escape(text(work / "out" / machine / "versions.txt")) + "</pre></div>")
+             f"<h1>Spark vs Spark + Comet: Iceberg to Iceberg, TPC-H SF {html.escape(scale)}</h1>",
+             "<pre>" + html.escape(text(out / "environment.txt", "no environment.txt yet")) + "</pre>"]
 
     if not runs:
-        parts.append("<p>No results yet for this machine and scale factor.</p>")
+        parts.append("<p>No results yet for this scale factor.</p>")
     else:
         results = {summary[r].get("result") for r in runs}
         check = ("<span class=ok>all runs produced the same result</span>" if len(results) == 1 else
-                 "<span class=bad>runs produced different results: " + html.escape(", ".join(map(str, results))) +
-                 "</span>")
+                 "<span class=bad>runs produced different results: " +
+                 html.escape(", ".join(map(str, results))) + "</span>")
         longest = max(float(summary[r]["wall_s"] or 0) for r in runs) or 1
         parts.append("<h2>Runs</h2><p>Medians over the measured iterations. " + check + ".</p>")
         parts.append("<table><tr><th>Run</th><th class=l>Configuration</th><th>Wall, s</th><th></th>"
-                     "<th>vs A</th><th>Executor CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
+                     "<th>vs Spark</th><th>Executor CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
                      "<th>Spark UI</th></tr>")
         for r in runs:
             s = summary[r]
             app = text(out / r / "app_id.txt").strip()
             width = 100 * float(s["wall_s"] or 0) / longest
-            cls = "bar spark" if r.startswith("A") else "bar"
-            mb = num(float(s["shuffle_write_bytes"] or 0) / 1e6, 1) if s.get("shuffle_write_bytes") else ""
+            cls = "bar spark" if r == "spark" else "bar"
+            mb = num(float(s["shuffle_write_bytes"]) / 1e6, 1) if s.get("shuffle_write_bytes") else ""
             parts.append(
-                f"<tr><td><b>{r}</b></td><td class=l>{html.escape(DESCRIPTIONS.get(r, ''))}</td>"
+                f"<tr><td><b>{r}</b></td><td class=l>{html.escape(RUNS[r])}</td>"
                 f"<td>{num(s['wall_s'])}</td><td style='width:160px'><div class='{cls}' style='width:{width:.0f}%'></div></td>"
-                f"<td>{num(s.get('wall_s_vs_A'))}</td><td>{num(s.get('executor_cpu_s'))}</td>"
+                f"<td>{num(s.get('wall_s_vs_spark'))}</td><td>{num(s.get('executor_cpu_s'))}</td>"
                 f"<td>{num(s.get('jvm_gc_s'))}</td><td>{mb}</td>"
                 f"<td><a href='http://localhost:18080/history/{html.escape(app)}/SQL/'>open</a></td></tr>")
-        parts.append("</table><p class=muted>Spark UI links open the History Server; pick the query named "
-                     "'&lt;run&gt; iter1'.</p>")
+        parts.append("</table><p class=muted>In the Spark UI, open the query named '&lt;run&gt; iter1'.</p>")
 
-        parts.append("<h2>Plans side by side</h2>")
+        parts.append("<h2>Plans side by side</h2><p class=muted>The plans as they ran (after adaptive "
+                     "query execution), first measured iteration.</p>")
         for left, right, title in COMPARISONS:
             if left in runs and right in runs:
-                parts.append(f"<h3>{left} vs {right}: {html.escape(title)}</h3><div class=cols>")
+                parts.append(f"<h3>{html.escape(title)}</h3><div class=cols>")
                 for r in (left, right):
                     parts.append(f"<div><b>{r}</b><pre>" +
                                  html.escape(plan_tree(text(out / r / "final_plan_iter1.txt"))) + "</pre></div>")
                 parts.append("</div>")
 
-        parts.append("<h2>Every run: final plan and Comet's notes</h2>")
+        parts.append("<h2>Each run in full</h2>")
         for r in runs:
-            parts.append(f"<details><summary><b>{r}</b>: {html.escape(DESCRIPTIONS.get(r, ''))}</summary>"
-                         "<p>Plan as it ran (after AQE):</p><pre>" +
+            parts.append(f"<details><summary><b>{r}</b>: {html.escape(RUNS[r])}</summary>"
+                         "<p>Plan as it ran, with operator details:</p><pre>" +
                          html.escape(text(out / r / "final_plan_iter1.txt")) + "</pre>"
-                         "<p>EXPLAIN EXTENDED before the run (Comet fallback reasons, if any):</p><pre>" +
+                         "<p>EXPLAIN EXTENDED before the run (for Comet runs it lists what falls back "
+                         "to Spark, and why):</p><pre>" +
                          html.escape(text(out / r / "explain_extended.txt")) + "</pre></details>")
 
     diff = out / "api_diff" / "plan_diff.txt"
     if diff.is_file():
-        parts.append("<h2>SQL vs DataFrame API</h2><pre>" + html.escape(diff.read_text()) + "</pre>")
+        parts.append("<h2>SQL vs DataFrame API</h2><p class=muted>The same query written with spark.sql() "
+                     "and with DataFrame calls, physical plans compared.</p><pre>" +
+                     html.escape(diff.read_text()) + "</pre>")
 
-    flames = sorted((out / "profiles").glob("*/flame-*.html"))
-    if flames:
-        (report / "profiles").mkdir(exist_ok=True)
-        links = []
-        for f in flames:
-            name = f"flame-cpu-{f.parent.name}.html"
-            shutil.copyfile(f, report / "profiles" / name)
-            links.append(f"<li><a href='profiles/{name}'>{f.parent.name}</a></li>")
-        parts.append("<h2>CPU flame graphs</h2><ul>" + "".join(links) + "</ul>")
+    if out.is_dir():
+        files = report / "files"
+        shutil.rmtree(files, ignore_errors=True)
+        shutil.copytree(out, files)
+        parts.append("<h2>Raw files</h2><p><a href='files/'>All outputs of this scale factor</a>: "
+                     "summary.csv, per-run timings, task metrics, plans, Spark configuration, driver logs.</p>")
 
     (report / "index.html").write_text("\n".join(parts))
     print(f"report -> {report / 'index.html'}")
