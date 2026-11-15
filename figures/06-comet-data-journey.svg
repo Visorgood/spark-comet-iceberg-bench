@@ -1,0 +1,302 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1256" viewBox="0 0 760 1256" role="img" aria-label="With Comet: columns from the source file to the target file" font-size="11.5" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+  <title>Data journey with Comet: the same four rows, Arrow arrays from file to file</title>
+  <rect id="paper" width="760" height="1256" fill="#FBF8F2"/>
+  <defs>
+    <marker id="j2-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#7A7368"/>
+    </marker>
+  </defs>
+  <text x="24" y="28" font-size="15" font-weight="600" fill="#1E1C19">With Comet: columns from the source file to the target file</text>
+  <text x="24" y="48" fill="#6B6459">The same four lineitem rows, illustrative values; one of them fails the filter</text>
+  <g id="legend">
+    <rect x="24" y="58" width="24" height="14" rx="3" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="56" y="69" fill="#6B6459">Rust: work done once per Arrow batch</text>
+    <rect x="296" y="58" width="24" height="14" rx="3" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <text x="328" y="69" fill="#6B6459">on disk</text>
+  </g>
+  <g id="connectors" fill="none" stroke="#7A7368" stroke-width="1.25">
+    <path d="M104 220V242" marker-end="url(#j2-arrow)"/>
+    <path d="M104 380V402" marker-end="url(#j2-arrow)"/>
+    <path d="M104 544V566" marker-end="url(#j2-arrow)"/>
+    <path d="M104 688V710" marker-end="url(#j2-arrow)"/>
+    <path d="M104 824V846" marker-end="url(#j2-arrow)"/>
+    <path d="M104 948V970" marker-end="url(#j2-arrow)"/>
+    <path d="M104 1036V1058" marker-end="url(#j2-arrow)"/>
+    <path d="M292 446H330" marker-end="url(#j2-arrow)"/>
+    <path d="M308 610H330" marker-end="url(#j2-arrow)"/>
+  </g>
+  <g id="p1-source">
+    <rect x="16" y="84" width="728" height="136" rx="8" fill="none" fill-opacity="1" stroke="#7A7368" stroke-width="1"/>
+    <text x="32" y="108" font-size="13" font-weight="600" fill="#1E1C19">Source: Parquet file</text>
+    <text x="32" y="126" fill="#6B6459">Iceberg table lineitem</text>
+    <text x="32" y="142" fill="#6B6459">on disk: column chunks</text>
+    <text x="284" y="104" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_orderkey</text>
+    <text x="412" y="104" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_extendedprice</text>
+    <text x="540" y="104" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_discount</text>
+    <text x="668" y="104" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_shipdate</text>
+    <g>
+      <rect x="224" y="112" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="132" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="152" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="172" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="352" y="112" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="132" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="152" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="172" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="480" y="112" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="132" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="152" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="172" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="608" y="112" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="132" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="152" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="172" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="284" y="126" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="284" y="146" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="284" y="166" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="284" y="186" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">3</text>
+    <text x="412" y="126" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">33078.94</text>
+    <text x="412" y="146" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">38306.16</text>
+    <text x="412" y="166" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.47</text>
+    <text x="412" y="186" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">39620.34</text>
+    <text x="540" y="126" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.04</text>
+    <text x="540" y="146" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.09</text>
+    <text x="540" y="166" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.00</text>
+    <text x="540" y="186" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.06</text>
+    <text x="668" y="126" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1996-03-13</text>
+    <text x="668" y="146" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1996-04-12</text>
+    <text x="668" y="166" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1997-01-28</text>
+    <text x="668" y="186" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1994-10-30</text>
+    <text x="32" y="208" fill="#6B6459">each column chunk: encoded pages (dictionary or plain), zstd-compressed; a row group holds one chunk per column</text>
+  </g>
+  <g id="p2-scan">
+    <rect x="16" y="244" width="728" height="136" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="268" font-size="13" font-weight="600" fill="#1E1C19">CometIcebergNativeScan</text>
+    <text x="32" y="286" fill="#6B6459">Rust: arrow-rs arrays</text>
+    <text x="32" y="302" fill="#6B6459">up to 8,192 rows a batch</text>
+    <text x="284" y="264" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_orderkey</text>
+    <text x="412" y="264" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_extendedprice</text>
+    <text x="540" y="264" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_discount</text>
+    <text x="668" y="264" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_shipdate</text>
+    <g>
+      <rect x="224" y="272" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="292" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="312" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="332" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="352" y="272" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="292" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="312" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="332" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="480" y="272" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="292" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="312" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="332" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="608" y="272" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="292" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="312" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="608" y="332" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="284" y="286" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="284" y="306" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="284" y="326" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="284" y="346" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">3</text>
+    <text x="412" y="286" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">33078.94</text>
+    <text x="412" y="306" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">38306.16</text>
+    <text x="412" y="326" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.47</text>
+    <text x="412" y="346" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">39620.34</text>
+    <text x="540" y="286" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.04</text>
+    <text x="540" y="306" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.09</text>
+    <text x="540" y="326" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.00</text>
+    <text x="540" y="346" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0.06</text>
+    <text x="668" y="286" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1996-03-13</text>
+    <text x="668" y="306" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1996-04-12</text>
+    <text x="668" y="326" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1997-01-28</text>
+    <text x="668" y="346" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1994-10-30</text>
+    <text x="32" y="368" fill="#6B6459">iceberg-rust decodes into Arrow arrays and applies the WHERE predicate: the grey 1994 row never leaves the scan</text>
+  </g>
+  <g id="p3-filter">
+    <rect x="16" y="404" width="728" height="140" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="428" font-size="13" font-weight="600" fill="#1E1C19">Filter and compute</text>
+    <text x="32" y="446" fill="#6B6459">Rust: CometFilter,</text>
+    <text x="32" y="462" fill="#6B6459">CometProject</text>
+    <text x="256" y="420" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">mask</text>
+    <text x="376" y="420" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_orderkey</text>
+    <text x="479" y="420" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">revenue</text>
+    <g>
+      <rect x="224" y="426" width="64" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="446" width="64" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="466" width="64" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="336" y="426" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="336" y="446" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="336" y="466" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="424" y="426" width="110" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="424" y="446" width="110" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="424" y="466" width="110" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="256" y="440" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">true</text>
+    <text x="256" y="460" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">true</text>
+    <text x="256" y="480" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">true</text>
+    <text x="376" y="440" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="376" y="460" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="376" y="480" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="479" y="440" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">31755.7824</text>
+    <text x="479" y="460" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">34858.6056</text>
+    <text x="479" y="480" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.4700</text>
+    <text x="32" y="532" fill="#6B6459">the mask is all true here, because the scan already filtered; the multiply runs on Decimal128 arrays</text>
+  </g>
+  <g id="p4-partial-agg">
+    <rect x="16" y="568" width="728" height="120" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="592" font-size="13" font-weight="600" fill="#1E1C19">CometHashAggregate</text>
+    <text x="32" y="610" fill="#6B6459">Rust: DataFusion</text>
+    <text x="32" y="626" fill="#6B6459">partial, per batch</text>
+    <text x="264" y="584" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">group index</text>
+    <text x="364" y="584" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">key</text>
+    <text x="447" y="584" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">sum</text>
+    <text x="534" y="584" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">is_empty</text>
+    <text x="590" y="584" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">count</text>
+    <g>
+      <rect x="224" y="590" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="610" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="630" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="336" y="590" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="336" y="610" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="392" y="590" width="110" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="392" y="610" width="110" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="502" y="590" width="64" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="502" y="610" width="64" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="566" y="590" width="48" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="566" y="610" width="48" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="264" y="604" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0</text>
+    <text x="264" y="624" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">0</text>
+    <text x="264" y="644" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="364" y="604" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="364" y="624" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="447" y="604" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">66614.3880</text>
+    <text x="447" y="624" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.4700</text>
+    <text x="534" y="604" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">false</text>
+    <text x="534" y="624" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">false</text>
+    <text x="590" y="604" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="590" y="624" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="32" y="676" fill="#6B6459">hashes for the whole key column at once; one slot per group in each state array; sums stay Decimal128</text>
+  </g>
+  <g id="p5-shuffle">
+    <rect x="16" y="712" width="728" height="112" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="736" font-size="13" font-weight="600" fill="#1E1C19">CometExchange</text>
+    <text x="32" y="754" fill="#6B6459">Rust: native shuffle</text>
+    <text x="32" y="770" fill="#6B6459">to local disk</text>
+    <rect x="224" y="732" width="40" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="264" y="732" width="100" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="364" y="732" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="420" y="732" width="40" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="224" y="766" width="40" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="264" y="766" width="100" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="364" y="766" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <rect x="420" y="766" width="40" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    <text x="244" y="746" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="314" y="746" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">66614.3880</text>
+    <text x="392" y="746" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">false</text>
+    <text x="440" y="746" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="476" y="746" fill="#6B6459">Arrow IPC block, lz4, for reducer A</text>
+    <text x="244" y="780" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="314" y="780" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.4700</text>
+    <text x="392" y="780" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">false</text>
+    <text x="440" y="780" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="476" y="780" fill="#6B6459">Arrow IPC block, lz4, for reducer B</text>
+    <text x="32" y="810" fill="#6B6459">Murmur3 + pmod for the whole key column; each block is a small Arrow batch, one array per column</text>
+  </g>
+  <g id="p6-final-agg">
+    <rect x="16" y="848" width="728" height="100" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="872" font-size="13" font-weight="600" fill="#1E1C19">Shuffle read + final agg</text>
+    <text x="32" y="890" fill="#6B6459">Rust: reduce task</text>
+    <text x="32" y="906" fill="#6B6459">Arrow batch in and out</text>
+    <text x="264" y="864" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_orderkey</text>
+    <text x="372" y="864" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">revenue</text>
+    <text x="468" y="864" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">lines</text>
+    <g>
+      <rect x="224" y="870" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="890" width="80" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="312" y="870" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="312" y="890" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="440" y="870" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="440" y="890" width="56" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="264" y="884" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="264" y="904" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="372" y="884" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">66614.3880</text>
+    <text x="372" y="904" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.4700</text>
+    <text x="468" y="884" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="468" y="904" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="520" y="894" fill="#6B6459">merged per batch, by group</text>
+    <text x="32" y="934" fill="#6B6459">illustration: both orders land in one reduce task; in a real run they may not</text>
+  </g>
+  <g id="p7-writer">
+    <rect x="16" y="972" width="728" height="64" rx="8" fill="#0F7F72" fill-opacity="0.1" stroke="#0F7F72" stroke-width="1.5"/>
+    <text x="32" y="996" font-size="13" font-weight="600" fill="#1E1C19">CometIcebergWrite</text>
+    <text x="32" y="1014" fill="#6B6459">Rust: iceberg-rust writer</text>
+    <text x="224" y="996" fill="#1E1C19">Arrow arrays go straight into Parquet column pages</text>
+    <text x="224" y="1014" fill="#6B6459">no rows, and no turn back to columns</text>
+  </g>
+  <g id="p8-target">
+    <rect x="16" y="1060" width="728" height="100" rx="8" fill="none" fill-opacity="1" stroke="#7A7368" stroke-width="1"/>
+    <text x="32" y="1084" font-size="13" font-weight="600" fill="#1E1C19">Target: Parquet file</text>
+    <text x="32" y="1102" fill="#6B6459">Iceberg table order_revenue</text>
+    <text x="32" y="1118" fill="#6B6459">on disk: column chunks</text>
+    <text x="284" y="1080" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">l_orderkey</text>
+    <text x="412" y="1080" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">revenue</text>
+    <text x="540" y="1080" text-anchor="middle" fill="#6B6459" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">lines</text>
+    <g>
+      <rect x="224" y="1088" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="224" y="1108" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="352" y="1088" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="352" y="1108" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <g>
+      <rect x="480" y="1088" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+      <rect x="480" y="1108" width="120" height="20" rx="2" fill="none" stroke="#7A7368" stroke-width="1"/>
+    </g>
+    <text x="284" y="1102" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="284" y="1122" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="412" y="1102" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">66614.3880</text>
+    <text x="412" y="1122" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">46796.4700</text>
+    <text x="540" y="1102" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">2</text>
+    <text x="540" y="1122" text-anchor="middle" fill="#1E1C19" font-family="'IBM Plex Mono', Menlo, Consolas, monospace" font-size="11">1</text>
+    <text x="32" y="1146" fill="#6B6459">encoded pages, zstd; IcebergCommit on the driver (Iceberg Java) adds the file to a new snapshot</text>
+  </g>
+  <g id="defaults-note">
+    <text x="24" y="1186" fill="#6B6459">Shown with spark.comet.write.iceberg.enabled=true. With the default (false), the last steps run</text>
+    <text x="24" y="1204" fill="#6B6459">as without Comet: CometColumnarToRow, then AppendData with iceberg-java&#x27;s row writer.</text>
+  </g>
+  <text id="credit" x="736" y="1244" text-anchor="end" font-size="10.5" fill="#6B6459">viacheslavinozemtsev.io</text>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTo1MzY4Nzc5My1kZjA4LTRiMmQtOTdlNS1mY2Q0NWFhMGJkMDgAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaBDTFcnMbXbl8ufjFdnr9RUAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpkYzExOGFjZC03ZGFkLTRhZDAtOTYwNS0xMDNkY2E2ZDdiZDBscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoxx1t+LefQUk9tMMcauSS2gAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggxqU1TZmeoC86w6pGQo18CsxPbNCzaXkyQJ4ZnicAvFakZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaOut56C5yYCoWo0y5UthH9AAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIND5hnQ2IGJmEf2H9MSMBA/Eb7eUUomRd2zvyMeg+E2SZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GXDqZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjUzNjg3NzkzLWRmMDgtNGIyZC05N2U1LWZjZDQ1YWEwYmQwOC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmEyY2M1Y2YxLTE0YTktNDBhYy1iMmExLTBjODU5YTQyNGFkY3JjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCDGpTVNmZ6gLzrDqkZCjXwKzE9s0LNpeTJAnhmeJwC8VqJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggUrXr2t+3y9irP1g2pQujdc6OfMN/62liyfrBESqx/jiiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggqxZii95fqaP8ksyjZfVhaYRI7Z7ZMJtp5DOTn/huTnN0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQDstwXwBhTAtYvo12yXjFyUq3V+J6NbdRzgTgMAGebOPTSjXbS6D70n2yUOX/+k9oQu9cjo5bx3YlSW9wc9lmqE=</c2pa:manifest></metadata></svg>

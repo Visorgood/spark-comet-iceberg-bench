@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1152" viewBox="0 0 760 1152" role="img" aria-label="With Comet the data stays an Arrow batch from file to file" font-size="11.5" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest">
+  <title>Spark + Comet: Arrow batches from source file to target file</title>
+  <rect id="paper" width="760" height="1152" fill="#FBF8F2"/>
+  <defs>
+    <marker id="cp-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#7A7368"/>
+    </marker>
+  </defs>
+  <text x="24" y="28" font-size="15" font-weight="600" fill="#1E1C19">With Comet the data stays an Arrow batch from file to file</text>
+  <g id="legend">
+    <rect x="24" y="44" width="24" height="14" rx="3" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="56" y="55" fill="#6B6459">Rust, once per Arrow batch</text>
+    <rect x="256" y="44" width="24" height="14" rx="3" fill="none" stroke="#7A7368" stroke-width="1.25"/>
+    <text x="288" y="55" fill="#6B6459">files and JVM work, once per file or per job</text>
+  </g>
+  <g id="connectors" fill="none" stroke="#7A7368" stroke-width="1.25">
+    <path d="M380 132V190" marker-end="url(#cp-arrow)"/>
+    <path d="M380 248V270" marker-end="url(#cp-arrow)"/>
+    <path d="M380 328V350" marker-end="url(#cp-arrow)"/>
+    <path d="M380 424V446" marker-end="url(#cp-arrow)"/>
+    <path d="M380 520V558" marker-end="url(#cp-arrow)"/>
+    <path d="M380 616V674" marker-end="url(#cp-arrow)"/>
+    <path d="M380 732V754" marker-end="url(#cp-arrow)"/>
+    <path d="M380 812V834" marker-end="url(#cp-arrow)"/>
+    <path d="M380 892V930" marker-end="url(#cp-arrow)"/>
+    <path d="M380 988V1010" marker-end="url(#cp-arrow)"/>
+  </g>
+  <g id="source-table">
+    <rect x="200" y="92" width="360" height="40" rx="8" fill="#EFE8DA" stroke="#7A7368" stroke-width="1.25"/>
+    <text x="380" y="117" text-anchor="middle" font-size="13" font-weight="600" fill="#1E1C19">Iceberg table lineitem: Parquet data files</text>
+  </g>
+  <g id="map-stage">
+    <rect x="48" y="156" width="664" height="380" rx="8" fill="none" stroke="#CFC7B8" stroke-width="1.25"/>
+    <text x="64" y="180" font-size="13" font-weight="600" fill="#6B6459">Map stage · one native plan per task</text>
+  </g>
+  <g id="step-scan">
+    <rect x="84" y="192" width="592" height="56" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="216" font-size="13" font-weight="600" fill="#1E1C19">CometIcebergNativeScan · iceberg-rust reader</text>
+    <text x="660" y="216" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="232" fill="#1E1C19">decodes Parquet into Arrow arrays (up to 8,192 rows) and applies the WHERE filter</text>
+  </g>
+  <g id="step-filter">
+    <rect x="84" y="272" width="592" height="56" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="296" font-size="13" font-weight="600" fill="#1E1C19">CometFilter → CometProject</text>
+    <text x="660" y="296" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="312" fill="#1E1C19">whole columns: boolean mask, filter kernel, Decimal128 multiply</text>
+  </g>
+  <g id="step-partial-agg">
+    <rect x="84" y="352" width="592" height="72" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="376" font-size="13" font-weight="600" fill="#1E1C19">CometHashAggregate (partial) · DataFusion AggregateExec</text>
+    <text x="660" y="376" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="392" fill="#1E1C19">per batch: hash the key column, map the hashes to group indices,</text>
+    <text x="100" y="408" fill="#1E1C19">update the Decimal128 sums and the counts for the whole batch</text>
+  </g>
+  <g id="step-shuffle-write">
+    <rect x="84" y="448" width="592" height="72" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="472" font-size="13" font-weight="600" fill="#1E1C19">CometExchange · native shuffle writer</text>
+    <text x="660" y="472" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="488" fill="#1E1C19">per batch: Murmur3 + pmod → partition ids; gather each partition&#x27;s rows</text>
+    <text x="100" y="504" fill="#1E1C19">write each block as an lz4-compressed Arrow IPC stream</text>
+  </g>
+  <g id="shuffle-files">
+    <rect x="84" y="560" width="592" height="56" rx="8" fill="#EFE8DA" stroke="#7A7368" stroke-width="1.25"/>
+    <text x="100" y="584" font-size="13" font-weight="600" fill="#1E1C19">Shuffle files on local disk</text>
+    <text x="100" y="600" fill="#1E1C19">same layout as Spark: one data file + one index file per map task; Arrow IPC blocks</text>
+  </g>
+  <g id="reduce-stage">
+    <rect x="48" y="640" width="664" height="268" rx="8" fill="none" stroke="#CFC7B8" stroke-width="1.25"/>
+    <text x="64" y="664" font-size="13" font-weight="600" fill="#6B6459">Reduce stage · one task per shuffle partition</text>
+  </g>
+  <g id="step-shuffle-read">
+    <rect x="84" y="676" width="592" height="56" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="700" font-size="13" font-weight="600" fill="#1E1C19">Native shuffle read</text>
+    <text x="660" y="700" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="716" fill="#1E1C19">decompress and decode the Arrow IPC blocks in Rust (direct read, no Arrow FFI hop)</text>
+  </g>
+  <g id="step-final-agg">
+    <rect x="84" y="756" width="592" height="56" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="780" font-size="13" font-weight="600" fill="#1E1C19">CometHashAggregate (final)</text>
+    <text x="660" y="780" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="796" fill="#1E1C19">per batch: merge the partial sums and counts by group</text>
+  </g>
+  <g id="step-writer">
+    <rect x="84" y="836" width="592" height="56" rx="8" fill="#0F7F72" fill-opacity="0.12" stroke="#0F7F72" stroke-width="2"/>
+    <text x="100" y="860" font-size="13" font-weight="600" fill="#1E1C19">CometIcebergWrite · iceberg-rust Parquet writer</text>
+    <text x="660" y="860" text-anchor="end" fill="#6B6459">Rust</text>
+    <text x="100" y="876" fill="#1E1C19">Arrow arrays straight into column pages, zstd; no rows anywhere</text>
+  </g>
+  <g id="driver-commit">
+    <rect x="84" y="932" width="592" height="56" rx="8" fill="none" fill-opacity="1" stroke="#7A7368" stroke-width="1.25"/>
+    <text x="100" y="956" font-size="13" font-weight="600" fill="#1E1C19">IcebergCommit · Iceberg Java on the driver</text>
+    <text x="660" y="956" text-anchor="end" fill="#6B6459">JVM</text>
+    <text x="100" y="972" fill="#1E1C19">adds the new data files to a new snapshot of the table</text>
+  </g>
+  <g id="target-table">
+    <rect x="200" y="1012" width="360" height="40" rx="8" fill="#EFE8DA" stroke="#7A7368" stroke-width="1.25"/>
+    <text x="380" y="1037" text-anchor="middle" font-size="13" font-weight="600" fill="#1E1C19">Iceberg table order_revenue: new data files</text>
+  </g>
+  <g id="defaults-note">
+    <text x="24" y="1080" fill="#6B6459">Shown with spark.comet.write.iceberg.enabled=true. With the default (false), CometColumnarToRow and</text>
+    <text x="24" y="1098" fill="#6B6459">AppendData with iceberg-java&#x27;s row writer take the place of CometIcebergWrite and IcebergCommit.</text>
+  </g>
+  <text id="credit" x="736" y="1140" text-anchor="end" font-size="10.5" fill="#6B6459">viacheslavinozemtsev.io</text>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTozMTQ4ZTBlZS1kNDZlLTRmODAtYWEyYi0xNmFlMWQyNmFjOWIAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaIBOGDFUA/NmB1Wk9nqWAcQAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo2MTg0MGI5OC0zMWUxLTRmNjAtYjk4ZC1lYjlkOGFkMjRhYWRscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoJ7+wwNkFokY/ZPWeyfaF/gAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggO9WcI0gfGJ5so6NhpGii3jTUmgGP7W/OTcVzk+Pa5SSkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaGtS06fiLFD7vgeCBQHUvoUAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIDBTz8wjP5Iw/36fD/rEYt8PmYtEMY/oEDi17ASRrg/+ZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GR42Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjMxNDhlMGVlLWQ0NmUtNGY4MC1hYTJiLTE2YWUxZDI2YWM5Yi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjEyMjdkMmZjLWE2MWItNDAzZC04ZTljLTgwMjc3M2Y3M2M5OHJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCA71ZwjSB8Ynmyjo2GkaKLeNNSaAY/tb85NxXOT49rlJKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggmzN6td6LuQKRVg6fwXoPAugNC7JPvpfTCoX5fwqKNqqiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggVIhqELghv2aZvkYE/sBsyxvTBNtcUcBTiW8PVLW5XlB0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQMmCHv73f2orY79ZtTkxs96mMLpCJfYeXTrrxnHRgOYDqbaOC0FrHy2XOk+eAdZ2PojXegt3/n+akKod7h24NW0=</c2pa:manifest></metadata></svg>
