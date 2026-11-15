@@ -1,24 +1,25 @@
 # Settings for the scripts inside the Docker image; sourced by docker/entrypoint.sh and every script.
 # The only setting meant to be changed is SCALE: docker run -e SCALE=0.1 ...
-# Versions (SPARK_VERSION, ICEBERG_VERSION, COMET_VERSION) and COMET_JAR are set in the Dockerfile.
+# Versions (SPARK_VERSION, ICEBERG_VERSION, COMET_VERSION, ASPROF_VERSION) and COMET_JAR are set in the Dockerfile.
 
 export BENCH_ROOT=/bench
 export WORK=/work                       # the Docker volume: data, tables, logs, outputs
 export SPARK_HOME=/opt/spark
+export ASPROF_HOME=/opt/async-profiler
 export DATA_DIR="$WORK/data"            # generated TPC-H Parquet
 export WAREHOUSE="$WORK/warehouse"      # Iceberg tables (Hadoop catalog "lake")
 export EVENTS_DIR="$WORK/spark-events"  # Spark event logs, read by the History Server
 export OUT_DIR="$WORK/out"              # per-run outputs: timings, metrics, plans
 export REPORT_DIR="$WORK/report"        # the HTML report served on port 8000
 
-export SCALE="${SCALE:-10}"             # TPC-H scale factor
+export SCALE="${SCALE:-100}"            # TPC-H scale factor
 export RUNS="spark comet comet-fallback"
 export WARMUP=1
 export ITERATIONS=5
 
-# Executor size from the container's limits (README: docker run --cpus=4 --memory=16g):
+# Executor size from the container's limits (README: docker run --cpus=8 --memory=24g):
 # all its CPUs, 30% of its memory as heap and 30% as off-heap (Comet's memory; the
-# Spark-only run gets the same pool). With 4 CPUs and 16 GB: 4 cores, 4g heap, 4g off-heap.
+# Spark-only run gets the same pool). With 8 CPUs and 24 GB: 8 cores, 7g heap, 7g off-heap.
 if [ -r /sys/fs/cgroup/memory.max ] && [ "$(cat /sys/fs/cgroup/memory.max)" != "max" ]; then
   _mem_bytes="$(cat /sys/fs/cgroup/memory.max)"
 else

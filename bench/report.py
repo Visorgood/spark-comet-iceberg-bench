@@ -82,7 +82,7 @@ def main():
                  html.escape(", ".join(map(str, results))) + "</span>")
         longest = max(float(summary[r]["wall_s"] or 0) for r in runs) or 1
         parts.append("<h2>Runs</h2><p>Medians over the measured iterations. " + check + ".</p>")
-        parts.append("<table><tr><th>Run</th><th class=l>Configuration</th><th>Wall, s</th><th></th>"
+        parts.append("<table><tr><th>Run</th><th class=l>Configuration</th><th>Wall, s</th><th>min–max</th><th></th>"
                      "<th>vs Spark</th><th>CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
                      "<th>Spark UI</th></tr>")
         for r in runs:
@@ -93,7 +93,7 @@ def main():
             mb = num(float(s["shuffle_write_bytes"]) / 1e6, 1) if s.get("shuffle_write_bytes") else ""
             parts.append(
                 f"<tr><td><b>{r}</b></td><td class=l>{html.escape(RUNS[r])}</td>"
-                f"<td>{num(s['wall_s'])}</td><td style='width:160px'><div class='{cls}' style='width:{width:.0f}%'></div></td>"
+                f"<td>{num(s['wall_s'])}</td><td class=muted>{num(s.get('wall_s_min'))}–{num(s.get('wall_s_max'))}</td><td style='width:160px'><div class='{cls}' style='width:{width:.0f}%'></div></td>"
                 f"<td>{num(s.get('wall_s_vs_spark'))}</td><td>{num(s.get('cpu_s'))}</td>"
                 f"<td>{num(s.get('jvm_gc_s'))}</td><td>{mb}</td>"
                 f"<td><a href='http://localhost:18080/history/{html.escape(app)}/SQL/'>open</a></td></tr>")
@@ -125,6 +125,14 @@ def main():
         parts.append("<h2>SQL vs DataFrame API</h2><p class=muted>The same query written with spark.sql() "
                      "and with DataFrame calls, physical plans compared.</p><pre>" +
                      html.escape(diff.read_text()) + "</pre>")
+
+    flames = sorted((out / "profiles").glob("*/flame-*.html"))
+    if flames:
+        links = "".join(f"<li><a href='files/profiles/{f.parent.name}/{f.name}'>{html.escape(f.parent.name)}</a></li>"
+                        for f in flames)
+        parts.append("<h2>CPU flame graphs</h2><p class=muted>One executor, a separate run of the same query "
+                     "(one warm-up, two iterations) under async-profiler; JVM and native frames together. "
+                     "The timed runs above are not profiled.</p><ul>" + links + "</ul>")
 
     if out.is_dir():
         files = report / "files"

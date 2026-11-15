@@ -19,6 +19,11 @@ WHERE  l_shipdate >= DATE '1995-01-01'
 GROUP  BY l_orderkey
 ```
 
+This is `sql/insert.sql`. Each run executes it six times in one Spark application, one
+warm-up and five measured iterations, each into a freshly emptied target table; the
+`comet-fallback` run uses `sql/insert_breaker.sql`, the same statement with one more
+condition in the `WHERE`.
+
 ## Run it
 
 You need Docker and a checkout of this repository. Build the image once, then one
@@ -28,21 +33,23 @@ command generates the data, runs the query, collects the metrics and serves the 
 git clone https://github.com/Visorgood/spark-comet-iceberg-bench.git
 cd spark-comet-iceberg-bench
 docker build -t spark-comet-iceberg-bench .
-docker run --rm -it --cpus=4 --memory=16g -p 8000:8000 -p 18080:18080 \
+docker run --rm -it --cpus=8 --memory=24g -p 8000:8000 -p 18080:18080 \
   -v spark-comet-bench:/work spark-comet-iceberg-bench
 ```
 
-`--cpus=4 --memory=16g` fixes the size of the container, so the setup does not depend on
-how many cores and how much memory your machine has: Spark gets one executor with 4
-cores, 4 GB of heap and 4 GB of off-heap memory. On
-Docker Desktop, first give Docker at least 6 CPUs and 18 GB in Settings → Resources:
-Docker's virtual machine needs some for itself.
+This is exactly the run behind the numbers in the blog post: TPC-H scale factor 100,
+600 million rows. `--cpus=8 --memory=24g` fixes the size of the container, so the setup
+does not depend on how many cores and how much memory your machine has: Spark gets one
+executor with 8 cores, 7 GB of heap and 7 GB of off-heap memory. On Docker Desktop, first
+give Docker at least 10 CPUs and 26 GB in Settings → Resources, because Docker's virtual
+machine needs some for itself, and check the disk limit there: the volume holds two
+copies of the 600 million rows (Parquet and Iceberg) plus shuffle files while it runs.
 
 When the run finishes it prints two addresses and keeps running until you press Ctrl+C:
 
 - **http://localhost:8000**, the report: median wall time of each run and its ratio to
   Spark, CPU time of the container, GC and shuffle bytes, a check that all runs produced
-  the same result, the plans side by side, and every raw output file.
+  the same result, the plans side by side, CPU flame graphs, and every raw output file.
 - **http://localhost:18080**, the Spark History Server: the full Spark UI of every run.
 
 To open them again later without rerunning anything, add `ui` at the end:
@@ -55,18 +62,18 @@ After a `git pull`, run `docker build` again; unchanged steps come from Docker's
 
 ### Data size
 
-The data is TPC-H `lineitem` at scale factor 10: 60 million rows, a couple of GB of
-Parquet. To change it, pass `SCALE` into the container with `-e`. A quick check that
+Pass `SCALE` into the container with `-e` to change the scale factor. A quick check that
 everything works takes a few minutes at scale factor 0.1:
 
 ```bash
-docker run --rm -it --cpus=4 --memory=16g -p 8000:8000 -p 18080:18080 \
+docker run --rm -it --cpus=8 --memory=24g -p 8000:8000 -p 18080:18080 \
   -v spark-comet-bench:/work -e SCALE=0.1 spark-comet-iceberg-bench
 ```
 
 At SF 0.1 every run must produce 87,632 rows with a revenue sum of 11719954528.9403 and
 a lines sum of 342,791. The report shows one scale factor at a time, so pass the same
-`-e SCALE=...` to `ui`.
+`-e SCALE=...` to `ui`. On a smaller machine, `--cpus=4 --memory=16g -e SCALE=10` runs the
+same comparison at a tenth of the size; its numbers differ from the post's.
 
 ## What runs
 
@@ -85,8 +92,13 @@ shows `IcebergWrite` instead of `CometIcebergWrite`, the native write was not us
 the EXPLAIN output in the report says why.
 
 Each run is one Spark application with one warm-up and five measured iterations; the
-report shows medians. All runs share the same cluster shape and memory, off-heap
-included. The exact Spark settings are in `scripts/lib.sh`.
+report shows the median wall time and the fastest and slowest iteration. All runs share
+the same cluster shape and memory, off-heap included. The exact Spark settings are in
+`scripts/lib.sh`.
+
+After the timed runs, `spark` and `comet` run once more under
+[async-profiler](https://github.com/async-profiler/async-profiler), each in its own Spark
+application, for the CPU flame graphs in the report. Profiling never touches the timed runs.
 
 ## What is inside the image
 
@@ -110,7 +122,7 @@ Docker on macOS and Windows runs in a virtual machine, so absolute times differ 
 bare metal. The comparison between runs stays fair because they share the same
 container limits, data and settings.
 
-- Keep `--cpus=4 --memory=16g`. With other limits the executor is sized from what the
+- Keep `--cpus=8 --memory=24g`. With other limits the executor is sized from what the
   container gets (all its CPUs, 30% of its memory as heap and 30% as off-heap), and the
   run prints a note that its numbers are not directly comparable.
 - Data stays in the Docker volume `spark-comet-bench`, not in a folder of your machine:
@@ -120,9 +132,12 @@ container limits, data and settings.
 ## Spark UI
 
 In the History Server (http://localhost:18080) each run is an application named
-`comet-blog-<run>`. Open it, go to the **SQL / DataFrame** tab and pick the query named
-`<run> iter1`: the graph shows every operator with its metrics, and **Details** under it
-shows the plan as text. The report links straight to these pages.
+`comet-blog-<run>`. Its **SQL / DataFrame** tab lists more queries than the one being
+measured: emptying the target table, the plans, and a result check after every iteration.
+The INSERTs are the queries named `<run> warmup` and `<run> iter1` to `<run> iter5`; the
+warm-up is not counted. Open `<run> iter1`: the graph shows every operator with its metrics, and
+**Details** under it shows the plan as text. The report links straight to these pages.
+The applications named `comet-blog-profile-<run>` are the profiled runs.
 
 ## Files and debugging
 
@@ -135,7 +150,7 @@ To look around or rerun a single step, start a shell in the container with the S
 cluster running; the scripts are in `/bench/scripts`:
 
 ```bash
-docker run --rm -it --cpus=4 --memory=16g -p 8000:8000 -p 18080:18080 \
+docker run --rm -it --cpus=8 --memory=24g -p 8000:8000 -p 18080:18080 \
   -v spark-comet-bench:/work spark-comet-iceberg-bench shell
 ```
 

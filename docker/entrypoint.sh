@@ -23,7 +23,7 @@ serve_ui() {
   cat <<EOF
 
 ==============================================================================
-  Report    http://localhost:8000    times, plans side by side, raw files
+  Report    http://localhost:8000    times, plans, flame graphs, raw files
   Spark UI  http://localhost:18080   every run; open one, then SQL / DataFrame
   Press Ctrl+C to stop.
 ==============================================================================
@@ -35,9 +35,9 @@ mkdir -p "$OUT_DIR" "$EVENTS_DIR" "$REPORT_DIR"
 
 case "${1:-all}" in
   all)
-    if [ "$CPUS" -ne 4 ] || [ "$MEM_GB" -ne 16 ]; then
+    if [ "$CPUS" -ne 8 ] || [ "$MEM_GB" -ne 24 ]; then
       echo "NOTE: this container has $CPUS CPUs and $MEM_GB GB; the README runs with" >&2
-      echo "      --cpus=4 --memory=16g, so these numbers are not directly comparable." >&2
+      echo "      --cpus=8 --memory=24g, so these numbers are not directly comparable." >&2
     fi
     bash scripts/05_machine_info.sh
     bash scripts/01_cluster.sh start
@@ -48,6 +48,8 @@ case "${1:-all}" in
     for RUN in $RUNS; do bash scripts/10_run.sh "$RUN" || FAILED="$FAILED $RUN"; done
     bash scripts/30_api_diff.sh || FAILED="$FAILED api-diff"
     bash scripts/20_metrics.sh || FAILED="$FAILED metrics"
+    # Flame graphs come from separate applications, so they never slow the timed runs.
+    for RUN in spark comet; do bash scripts/40_profile.sh "$RUN" || FAILED="$FAILED profile-$RUN"; done
     if [ -n "$FAILED" ]; then
       echo "WARNING: failed:$FAILED (see driver.log under Raw files in the report)" >&2
     fi

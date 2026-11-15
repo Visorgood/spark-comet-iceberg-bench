@@ -8,3 +8,6 @@ hs_err_pid*
 
 __pycache__/
 .DS_Store
+
+# Flame graphs copied out of the Docker volume for the blog post
+flamegraphs/

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Everything the benchmark needs, pinned: Java 17 (Eclipse Temurin build of OpenJDK),
-# Spark, Iceberg, Comet and the TPC-H generator.
+# Spark, Iceberg, Comet, the TPC-H generator and async-profiler.
 # Build:  docker build -t spark-comet-iceberg-bench .
 # Run:    see README.md
 FROM eclipse-temurin:17-jdk-jammy
@@ -10,14 +10,18 @@ ARG SCALA_BINARY=2.13
 ARG ICEBERG_VERSION=1.11.0
 ARG COMET_VERSION=1.2.0
 ARG TPCHGEN_VERSION=4.0.0
+ARG ASPROF_VERSION=4.5
+ARG TARGETARCH
 
 ENV SPARK_VERSION=${SPARK_VERSION} \
     SCALA_BINARY=${SCALA_BINARY} \
     ICEBERG_VERSION=${ICEBERG_VERSION} \
     COMET_VERSION=${COMET_VERSION} \
     TPCHGEN_VERSION=${TPCHGEN_VERSION} \
+    ASPROF_VERSION=${ASPROF_VERSION} \
     SPARK_HOME=/opt/spark \
     COMET_JAR=/opt/comet/comet-spark-spark4.1_${SCALA_BINARY}-${COMET_VERSION}.jar \
+    ASPROF_HOME=/opt/async-profiler \
     BENCH_ROOT=/bench \
     WORK=/work \
     PYSPARK_PYTHON=python3 \
@@ -56,6 +60,14 @@ RUN set -eux; \
     curl -fsSL -o /tmp/comet.sha1 "$mvn/org/apache/datafusion/${comet}/${COMET_VERSION}/${comet}-${COMET_VERSION}.jar.sha1"; \
     python3 /usr/local/bin/verify_checksum.py "$COMET_JAR" /tmp/comet.sha1 sha1; \
     rm -f /tmp/*.sha1
+
+# async-profiler for the CPU flame graphs
+RUN set -eux; \
+    target="${TARGETARCH:-$(dpkg --print-architecture)}"; \
+    case "$target" in amd64) arch=x64 ;; arm64) arch=arm64 ;; *) echo "unsupported architecture $target"; exit 1 ;; esac; \
+    mkdir -p "$ASPROF_HOME"; \
+    curl -fsSL "https://github.com/async-profiler/async-profiler/releases/download/v${ASPROF_VERSION}/async-profiler-${ASPROF_VERSION}-linux-${arch}.tar.gz" \
+      | tar xz -C "$ASPROF_HOME" --strip-components=1
 
 COPY env.sh /bench/env.sh
 COPY scripts /bench/scripts
