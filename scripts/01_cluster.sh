@@ -11,7 +11,7 @@ case "${1:-}" in
     mkdir -p "$EVENTS_DIR"
     if ! curl -fs http://127.0.0.1:8080/json/ >/dev/null 2>&1; then
       "$SPARK_HOME/sbin/start-master.sh" >/dev/null
-      "$SPARK_HOME/sbin/start-worker.sh" "$SPARK_MASTER" --cores "$CORES" --memory "$WORKER_MEM" >/dev/null
+      "$SPARK_HOME/sbin/start-worker.sh" "$MASTER_URL" --cores "$CORES" --memory "$WORKER_MEM" >/dev/null
     fi
     for _ in $(seq 1 60); do   # wait until the worker has registered
       if curl -fs http://127.0.0.1:8080/json/ | grep -q '"aliveworkers" *: *1'; then

@@ -47,5 +47,6 @@ export SPARK_DAEMON_MEMORY=512m             # Spark master, worker and History S
 
 # One-worker Spark standalone cluster inside the container
 export SPARK_MASTER_HOST=127.0.0.1
-export SPARK_MASTER="spark://127.0.0.1:7077"
+# Not named SPARK_MASTER: Spark's sbin/spark-daemon.sh treats that variable as an rsync source.
+export MASTER_URL="spark://127.0.0.1:7077"
 export PATH="$SPARK_HOME/bin:$PATH"

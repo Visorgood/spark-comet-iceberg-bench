@@ -9,7 +9,7 @@ out_dir() { echo "$OUT_DIR/sf$SCALE"; }
 
 base_args() {
   ARGS=(
-    --master "$SPARK_MASTER"
+    --master "$MASTER_URL"
     --driver-memory "$DRIVER_MEM"
     --conf spark.executor.instances=1
     --conf spark.executor.cores="$CORES"
