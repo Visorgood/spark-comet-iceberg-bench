@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copies the curated outputs of $MACHINE_ID / SF $SCALE to $EXPORT_DIR/results/<machine>/sf<scale>/,
 # i.e. into the results/ folder of your checkout when it is mounted at /export:
-#   docker run --rm -v spark-comet-bench:/work -v "$PWD":/export <image> export
+#   docker run --rm -v spark-comet-bench:/work -v "$PWD":/export spark-comet-iceberg-bench export
 # Copies summary, per-run metrics and plans, API diff, flame graphs, screenshots,
 # machine.txt and versions.txt. Event logs, data and driver logs stay in the volume.
 set -euo pipefail

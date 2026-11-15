@@ -21,16 +21,22 @@ GROUP  BY l_orderkey
 
 ## Run it
 
-You need Docker and nothing else. One command generates the data, runs every
-configuration, extracts the metrics and then serves the results:
+You need Docker and a checkout of this repository. Build the image once, then one
+command generates the data, runs every configuration, extracts the metrics and serves
+the results:
 
 ```bash
-docker run --rm -it -p 8000:8000 -p 18080:18080 \
-  -v spark-comet-bench:/work \
-  ghcr.io/visorgood/spark-comet-iceberg-bench
+git clone https://github.com/Visorgood/spark-comet-iceberg-bench.git
+cd spark-comet-iceberg-bench
+docker build -t spark-comet-iceberg-bench .
+docker run --rm -it -p 8000:8000 -p 18080:18080 -v spark-comet-bench:/work spark-comet-iceberg-bench
 ```
 
-When it finishes it prints two addresses and keeps running until you press Ctrl+C:
+The build downloads Spark, Iceberg, Comet, the TPC-H generator and async-profiler and
+checks their checksums (see "What is inside the image"). After a `git pull`, run
+`docker build` again; unchanged steps come from Docker's cache.
+
+When the run finishes it prints two addresses and keeps running until you press Ctrl+C:
 
 - **http://localhost:8000**, the report: median wall time per run, ratio to Spark, CPU,
   GC and shuffle bytes, a check that every run produced the same result, plans side by
@@ -38,20 +44,21 @@ When it finishes it prints two addresses and keeps running until you press Ctrl+
 - **http://localhost:18080**, the Spark History Server: the full Spark UI of every run
   (SQL / DataFrame tab with the plan graph and metrics, stages, executors).
 
-To see the UI again later without rerunning anything:
+To see the UI again later without rerunning anything, add the `ui` command:
+
+```bash
+docker run --rm -it -p 8000:8000 -p 18080:18080 -v spark-comet-bench:/work spark-comet-iceberg-bench ui
+```
+
+**Smoke test first.** A small scale factor and two runs, Spark only and Spark + Comet:
 
 ```bash
 docker run --rm -it -p 8000:8000 -p 18080:18080 -v spark-comet-bench:/work \
-  ghcr.io/visorgood/spark-comet-iceberg-bench ui
+  -e SCALE=0.1 -e RUNS="A C" spark-comet-iceberg-bench
 ```
 
-**Smoke test first**: add `-e SCALE=0.1 -e RUNS="A C"`. Every run must
-report the same result; at SF 0.1 it is 87,632 output rows, a revenue sum of
-11719954528.9403 and a lines sum of 342,791.
-
-To build the image yourself instead of pulling it, run `docker build -t
-spark-comet-iceberg-bench .` in a checkout and use `spark-comet-iceberg-bench` as the
-image name in the commands.
+Every run must report the same result; at SF 0.1 it is 87,632 output rows, a revenue
+sum of 11719954528.9403 and a lines sum of 342,791.
 
 ## What is inside the image
 
@@ -148,9 +155,12 @@ eligible; the reason is in the run's EXPLAIN EXTENDED (in the report) and its `d
 
 ## Step by step, for debugging
 
-The image's commands run one step at a time against the same volume. Prefix each with
-`docker run --rm -it -p 8000:8000 -p 18080:18080 -v spark-comet-bench:/work
-ghcr.io/visorgood/spark-comet-iceberg-bench`:
+The image's commands run one step at a time against the same volume. Put the command
+at the end of the usual line, for example:
+
+```bash
+docker run --rm -it -p 8000:8000 -p 18080:18080 -v spark-comet-bench:/work spark-comet-iceberg-bench run A C
+```
 
 | Command | What it does |
 | --- | --- |
@@ -168,9 +178,15 @@ ghcr.io/visorgood/spark-comet-iceberg-bench`:
 
 To watch a run live, add `-p 4040:4040` and open http://localhost:4040 while it runs.
 
-To look at the files in the volume: `docker run --rm -it -v spark-comet-bench:/work
---entrypoint bash ghcr.io/visorgood/spark-comet-iceberg-bench`, then `ls /work`.
-To free the disk space when you are done: `docker volume rm spark-comet-bench`.
+To look at the files in the volume without starting Spark:
+
+```bash
+docker run --rm -it -v spark-comet-bench:/work --entrypoint bash spark-comet-iceberg-bench
+ls /work
+```
+
+To free the disk space when you are done: `docker volume rm spark-comet-bench`, and
+`docker image rm spark-comet-iceberg-bench` for the image.
 
 ## Outputs
 
@@ -197,13 +213,12 @@ and expand **Details** under the graph. In Chrome, DevTools → Cmd/Ctrl+Shift+P
 
 ## Sharing your results
 
-Run with a descriptive `MACHINE_ID` and `HOST_INFO`, then from a checkout of this
-repository:
+Run with a descriptive `MACHINE_ID` and `HOST_INFO`, then from the root of your
+checkout:
 
 ```bash
 docker run --rm -v spark-comet-bench:/work -v "$PWD":/export \
-  -e MACHINE_ID=<the same id> -e SCALE=<the same scale> \
-  ghcr.io/visorgood/spark-comet-iceberg-bench export
+  -e MACHINE_ID=<the same id> -e SCALE=<the same scale> spark-comet-iceberg-bench export
 ```
 
 This writes `results/<machine-id>/` (summary, per-run metrics and plans, API diff, flame

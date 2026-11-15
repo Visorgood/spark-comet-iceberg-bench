@@ -5,8 +5,7 @@ One folder per machine, one subfolder per TPC-H scale factor, written by the ima
 
 ```bash
 docker run --rm -v spark-comet-bench:/work -v "$PWD":/export \
-  -e MACHINE_ID=<the id used for the run> -e SCALE=<scale> \
-  ghcr.io/visorgood/spark-comet-iceberg-bench export
+  -e MACHINE_ID=<the id used for the run> -e SCALE=<scale> spark-comet-iceberg-bench export
 ```
 
 ```

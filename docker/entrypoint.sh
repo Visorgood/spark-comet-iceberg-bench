@@ -7,7 +7,7 @@ source ./env.sh
 
 usage() {
   cat <<EOF
-Commands:  docker run ... <image> <command> [args]
+Commands:  docker run ... spark-comet-iceberg-bench <command> [args]
   all            generate data, run: $RUNS, metrics, API diff, report, then serve the UI (default)
   data           generate lineitem and load it into Iceberg for SCALE=$SCALE
   run A C ...    run the given configurations, then extract their metrics
