@@ -1,27 +1,26 @@
 #!/usr/bin/env bash
-# Copies the curated part of out/$MACHINE_ID/sf$SCALE into results/$MACHINE_ID/sf$SCALE,
-# the folder that is committed: summary, per-run metrics and plans, API diff, flame graphs,
-# screenshots, machine.txt and versions.txt. Event logs, data and driver logs stay out.
-# Text files get your home directory and host name replaced, so nothing personal is published.
-# It only adds or overwrites files under results/; review with `git status` before committing.
+# Copies the curated outputs of $MACHINE_ID / SF $SCALE to $EXPORT_DIR/results/<machine>/sf<scale>/,
+# i.e. into the results/ folder of your checkout when it is mounted at /export:
+#   docker run --rm -v spark-comet-bench:/work -v "$PWD":/export <image> export
+# Copies summary, per-run metrics and plans, API diff, flame graphs, screenshots,
+# machine.txt and versions.txt. Event logs, data and driver logs stay in the volume.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source ./env.sh
 source scripts/lib.sh
 
 SRC="$(out_dir)"
-DST="$RESULTS_DIR/$MACHINE_ID/sf$SCALE"
-[ -f "$SRC/summary.csv" ] || { echo "No $SRC/summary.csv: run bash scripts/20_metrics.sh first." >&2; exit 1; }
+[ -d "$EXPORT_DIR" ] || { echo "Mount a folder at $EXPORT_DIR: -v \"\$PWD\":$EXPORT_DIR" >&2; exit 1; }
+[ -f "$SRC/summary.csv" ] || { echo "No $SRC/summary.csv yet: run the benchmark first." >&2; exit 1; }
+DST="$EXPORT_DIR/results/$MACHINE_ID/sf$SCALE"
 mkdir -p "$DST"
-HOST="$(hostname)"
+HOST="$(hostname)"   # the container id; masked so it does not end up in the repository
 
-copy_text() {  # $1 = source file, $2 = destination file
-  sed -e "s|$HOME|~|g" -e "s|$HOST|<host>|g" "$1" > "$2"
-}
+copy_text() { sed -e "s|$HOST|<host>|g" "$1" > "$2"; }
 
 for f in machine.txt versions.txt; do
   if [ -f "$OUT_DIR/$MACHINE_ID/$f" ]; then
-    copy_text "$OUT_DIR/$MACHINE_ID/$f" "$RESULTS_DIR/$MACHINE_ID/$f"
+    copy_text "$OUT_DIR/$MACHINE_ID/$f" "$EXPORT_DIR/results/$MACHINE_ID/$f"
   fi
 done
 copy_text "$SRC/summary.csv" "$DST/summary.csv"
@@ -35,24 +34,19 @@ for run_dir in "$SRC"/*/; do
     if [ -f "$run_dir/$f" ]; then copy_text "$run_dir/$f" "$DST/$run/$f"; fi
   done
 done
-
 if [ -d "$SRC/api_diff" ]; then
   mkdir -p "$DST/api_diff"
   for f in "$SRC"/api_diff/*.txt; do copy_text "$f" "$DST/api_diff/$(basename "$f")"; done
 fi
-if [ -d "$SRC/profiles" ]; then
-  for f in "$SRC"/profiles/*/flame-*.html; do
-    if [ ! -f "$f" ]; then continue; fi
-    run="$(basename "$(dirname "$f")")"
-    mkdir -p "$DST/profiles"
-    cp "$f" "$DST/profiles/flame-cpu-$run.html"
-  done
-fi
+for f in "$SRC"/profiles/*/flame-*.html; do
+  if [ ! -f "$f" ]; then continue; fi
+  mkdir -p "$DST/profiles"
+  cp "$f" "$DST/profiles/flame-cpu-$(basename "$(dirname "$f")").html"
+done
 if [ -d "$SRC/screenshots" ]; then
   mkdir -p "$DST/screenshots"
   cp "$SRC"/screenshots/*.png "$DST/screenshots/" 2>/dev/null || true
 fi
-
-echo "== Copied to $DST"
-du -sh "$DST"
-echo "Review: git status && git diff --stat"
+# Give the files the owner of the mounted folder, not root (matters on Linux hosts).
+chown -R "$(stat -c %u:%g "$EXPORT_DIR")" "$EXPORT_DIR/results"
+echo "== Exported to results/$MACHINE_ID/sf$SCALE in the mounted folder"

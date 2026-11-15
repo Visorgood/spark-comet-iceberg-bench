@@ -1,0 +1,7 @@
+# Only env.sh, scripts/, sql/, bench/ and docker/ go into the image.
+.git
+.github
+.idea
+*.md
+results
+__pycache__
