@@ -36,7 +36,7 @@ mkdir -p "$OUT_DIR" "$EVENTS_DIR" "$REPORT_DIR"
 case "${1:-all}" in
   all)
     if [ "$CPUS" -ne 8 ] || [ "$MEM_GB" -ne 24 ]; then
-      echo "NOTE: this container has $CPUS CPUs and $MEM_GB GB; the README runs with" >&2
+      echo "NOTE: this container has $CPUS CPUs and $MEM_GB GiB; the README runs with" >&2
       echo "      --cpus=8 --memory=24g, so these numbers are not directly comparable." >&2
     fi
     bash scripts/05_machine_info.sh

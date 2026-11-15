@@ -83,19 +83,19 @@ def main():
         longest = max(float(summary[r]["wall_s"] or 0) for r in runs) or 1
         parts.append("<h2>Runs</h2><p>Medians over the measured iterations. " + check + ".</p>")
         parts.append("<table><tr><th>Run</th><th class=l>Configuration</th><th>Wall, s</th><th>min–max</th><th></th>"
-                     "<th>vs Spark</th><th>CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
+                     "<th>vs Spark</th><th>CPU, s</th><th>GC, s</th><th>Shuffle written, MiB</th>"
                      "<th>Spark UI</th></tr>")
         for r in runs:
             s = summary[r]
             app = text(out / r / "app_id.txt").strip()
             width = 100 * float(s["wall_s"] or 0) / longest
             cls = "bar spark" if r == "spark" else "bar"
-            mb = num(float(s["shuffle_write_bytes"]) / 1e6, 1) if s.get("shuffle_write_bytes") else ""
+            mib = num(float(s["shuffle_write_bytes"]) / 2**20, 1) if s.get("shuffle_write_bytes") else ""
             parts.append(
                 f"<tr><td><b>{r}</b></td><td class=l>{html.escape(RUNS[r])}</td>"
                 f"<td>{num(s['wall_s'])}</td><td class=muted>{num(s.get('wall_s_min'))}–{num(s.get('wall_s_max'))}</td><td style='width:160px'><div class='{cls}' style='width:{width:.0f}%'></div></td>"
                 f"<td>{num(s.get('wall_s_vs_spark'))}</td><td>{num(s.get('cpu_s'))}</td>"
-                f"<td>{num(s.get('jvm_gc_s'))}</td><td>{mb}</td>"
+                f"<td>{num(s.get('jvm_gc_s'))}</td><td>{mib}</td>"
                 f"<td><a href='http://localhost:18080/history/{html.escape(app)}/SQL/'>open</a></td></tr>")
         parts.append("</table><p class=muted>CPU: seconds used by all processes in the container while "
                      "the query ran. Spark's own executor CPU metric counts only task threads and misses "

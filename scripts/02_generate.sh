@@ -10,7 +10,7 @@ if [ -f "$OUT/.done" ]; then
   echo "== lineitem SF $SCALE already generated"
   exit 0
 fi
-PARTS="$(awk -v s="$SCALE" 'BEGIN { p = int(s); if (p < 4) p = 4; print p }')"  # ~600 MB per file
+PARTS="$(awk -v s="$SCALE" 'BEGIN { p = int(s); if (p < 4) p = 4; print p }')"  # one file per unit of scale factor, at least 4
 mkdir -p "$OUT"
 echo "== Generating lineitem, SF $SCALE, $PARTS files"
 tpchgen-cli parquet -s "$SCALE" --tables=lineitem --parts="$PARTS" --output-dir="$OUT"

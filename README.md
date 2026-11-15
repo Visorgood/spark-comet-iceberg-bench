@@ -3,8 +3,8 @@
 Reproduction for the blog post *Where Spark loses time, and how Comet gets it back*
 (link added on publication).
 
-The post follows one ordinary ETL step — read an Iceberg table, filter, compute, group by
-a key, write an Iceberg table — through Apache Spark alone and through Spark with
+The post follows one ordinary ETL step – read an Iceberg table, filter, compute, group by
+a key, write an Iceberg table – through Apache Spark alone and through Spark with
 [Apache DataFusion Comet](https://github.com/apache/datafusion-comet). This repository
 runs that step both ways inside one Docker container and shows the wall time, task
 metrics, physical plans and the Spark UI of each run.
@@ -40,8 +40,8 @@ docker run --rm -it --cpus=8 --memory=24g -p 8000:8000 -p 18080:18080 \
 This is exactly the run behind the numbers in the blog post: TPC-H scale factor 100,
 600 million rows. `--cpus=8 --memory=24g` fixes the size of the container, so the setup
 does not depend on how many cores and how much memory your machine has: Spark gets one
-executor with 8 cores, 7 GB of heap and 7 GB of off-heap memory. On Docker Desktop, first
-give Docker at least 10 CPUs and 26 GB in Settings → Resources, because Docker's virtual
+executor with 8 cores, 7 GiB of heap and 7 GiB of off-heap memory. On Docker Desktop, first
+give Docker at least 10 CPUs and 26 GiB in Settings → Resources, because Docker's virtual
 machine needs some for itself, and check the disk limit there: the volume holds two
 copies of the 600 million rows (Parquet and Iceberg) plus shuffle files while it runs.
 

@@ -12,7 +12,7 @@ mkdir -p "$(out_dir)"
   MODEL="$(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}')"
   if [ -z "$MODEL" ] || [ "$MODEL" = "-" ]; then MODEL="model not reported (e.g. Docker Desktop's VM)"; fi
   echo "cpu: $MODEL, $(uname -m)"
-  echo "container limits: $CPUS CPUs, ${MEM_GB} GB memory (CPUs visible: $(nproc))"
+  echo "container limits: $CPUS CPUs, ${MEM_GB} GiB memory (CPUs visible: $(nproc))"
   echo "executor: $CORES cores, heap $EXEC_MEM, off-heap $OFFHEAP; driver $DRIVER_MEM"
   echo "iterations per run: $WARMUP warm-up + $ITERATIONS measured"
   echo "spark $SPARK_VERSION, iceberg $ICEBERG_VERSION, comet $COMET_VERSION, $(tpchgen-cli --version)"

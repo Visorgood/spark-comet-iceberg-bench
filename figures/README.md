@@ -3,7 +3,7 @@
 The images in the blog post *Where Spark loses time, and how Comet gets it back*, with their sources.
 
 Measured with Spark 4.1.3, Iceberg 1.11.0 and Comet 1.2.0, at TPC-H scale factor 100, in a container with
-8 CPUs and 24 GB (the main command in the top-level README).
+8 CPUs and 24 GiB (the main command in the top-level README).
 
 | # | File | What it shows | Source |
 | --- | --- | --- | --- |

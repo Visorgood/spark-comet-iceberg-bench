@@ -19,7 +19,7 @@ export ITERATIONS=5
 
 # Executor size from the container's limits (README: docker run --cpus=8 --memory=24g):
 # all its CPUs, 30% of its memory as heap and 30% as off-heap (Comet's memory; the
-# Spark-only run gets the same pool). With 8 CPUs and 24 GB: 8 cores, 7g heap, 7g off-heap.
+# Spark-only run gets the same pool). With 8 CPUs and 24 GiB: 8 cores, 7g heap, 7g off-heap.
 if [ -r /sys/fs/cgroup/memory.max ] && [ "$(cat /sys/fs/cgroup/memory.max)" != "max" ]; then
   _mem_bytes="$(cat /sys/fs/cgroup/memory.max)"
 else
