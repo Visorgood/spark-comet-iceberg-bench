@@ -40,7 +40,7 @@ TASK_METRICS = {
     "output_bytes": ("internal.metrics.output.bytesWritten", 1),
 }
 PEAK_METRICS = ["JVMHeapMemory", "JVMOffHeapMemory", "OnHeapExecutionMemory", "OffHeapExecutionMemory"]
-SUMMARY_COLS = ["wall_s", "executor_cpu_s", "jvm_gc_s", "shuffle_write_bytes", "shuffle_write_time_s",
+SUMMARY_COLS = ["wall_s", "cpu_s", "executor_cpu_s", "jvm_gc_s", "shuffle_write_bytes", "shuffle_write_time_s",
                 "spill_disk_bytes", "map_stage_s", "reduce_stage_s", "peak_JVMHeapMemory",
                 "peak_OffHeapExecutionMemory"]
 
@@ -184,6 +184,8 @@ def main():
             row = {"run": run, **its[label][0]}
             if label in wall:
                 row["wall_s"] = float(wall[label]["wall_s"])
+                if wall[label].get("cpu_s"):
+                    row["cpu_s"] = float(wall[label]["cpu_s"])
                 row["result"] = f'{wall[label]["out_rows"]}/{wall[label]["sum_revenue"]}/{wall[label]["sum_lines"]}'
             rows.append(row)
         write_csv(run_dir / "iterations.csv", rows)
@@ -209,7 +211,7 @@ def main():
     base = next((s for s in summary if s["run"] == "spark"), None)
     if base:
         for s in summary:
-            for col in ("wall_s", "executor_cpu_s", "jvm_gc_s", "shuffle_write_bytes"):
+            for col in ("wall_s", "cpu_s", "executor_cpu_s", "jvm_gc_s", "shuffle_write_bytes"):
                 if base.get(col) and s.get(col) is not None:
                     s[f"{col}_vs_spark"] = round(s[col] / base[col], 3)
     write_csv(results / "summary.csv", summary)

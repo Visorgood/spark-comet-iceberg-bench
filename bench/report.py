@@ -15,10 +15,10 @@ import shutil
 RUNS = {
     "spark": "Spark only",
     "comet": "Spark + Comet: native Iceberg scan, operators, shuffle and Iceberg write",
-    "comet-fallback": "As comet, plus a data-quality guard (assert_true) that Comet hands back to Spark",
+    "comet-fallback": "As comet, plus a data-quality guard (assert_true) that Comet does not support",
 }
 COMPARISONS = [("spark", "comet", "Spark vs Spark + Comet"),
-               ("comet", "comet-fallback", "Comet without and with one operator that falls back to Spark")]
+               ("comet", "comet-fallback", "Comet without and with one expression it does not support")]
 CSS = """
 body{font:14px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;margin:24px auto;max-width:1200px;padding:0 16px;color:#1f2328}
 h1{font-size:22px}h2{font-size:17px;margin-top:32px;border-bottom:1px solid #d0d7de;padding-bottom:4px}
@@ -83,7 +83,7 @@ def main():
         longest = max(float(summary[r]["wall_s"] or 0) for r in runs) or 1
         parts.append("<h2>Runs</h2><p>Medians over the measured iterations. " + check + ".</p>")
         parts.append("<table><tr><th>Run</th><th class=l>Configuration</th><th>Wall, s</th><th></th>"
-                     "<th>vs Spark</th><th>Executor CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
+                     "<th>vs Spark</th><th>CPU, s</th><th>GC, s</th><th>Shuffle written, MB</th>"
                      "<th>Spark UI</th></tr>")
         for r in runs:
             s = summary[r]
@@ -94,10 +94,12 @@ def main():
             parts.append(
                 f"<tr><td><b>{r}</b></td><td class=l>{html.escape(RUNS[r])}</td>"
                 f"<td>{num(s['wall_s'])}</td><td style='width:160px'><div class='{cls}' style='width:{width:.0f}%'></div></td>"
-                f"<td>{num(s.get('wall_s_vs_spark'))}</td><td>{num(s.get('executor_cpu_s'))}</td>"
+                f"<td>{num(s.get('wall_s_vs_spark'))}</td><td>{num(s.get('cpu_s'))}</td>"
                 f"<td>{num(s.get('jvm_gc_s'))}</td><td>{mb}</td>"
                 f"<td><a href='http://localhost:18080/history/{html.escape(app)}/SQL/'>open</a></td></tr>")
-        parts.append("</table><p class=muted>In the Spark UI, open the query named '&lt;run&gt; iter1'.</p>")
+        parts.append("</table><p class=muted>CPU: seconds used by all processes in the container while "
+                     "the query ran. Spark's own executor CPU metric counts only task threads and misses "
+                     "Comet's native threads. In the Spark UI, open the query named '&lt;run&gt; iter1'.</p>")
 
         parts.append("<h2>Plans side by side</h2><p class=muted>The plans as they ran (after adaptive "
                      "query execution), first measured iteration.</p>")

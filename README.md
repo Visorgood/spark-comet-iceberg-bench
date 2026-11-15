@@ -41,8 +41,8 @@ Docker's virtual machine needs some for itself.
 When the run finishes it prints two addresses and keeps running until you press Ctrl+C:
 
 - **http://localhost:8000**, the report: median wall time of each run and its ratio to
-  Spark, CPU, GC and shuffle bytes, a check that all runs produced the same result,
-  the plans side by side, and every raw output file.
+  Spark, CPU time of the container, GC and shuffle bytes, a check that all runs produced
+  the same result, the plans side by side, and every raw output file.
 - **http://localhost:18080**, the Spark History Server: the full Spark UI of every run.
 
 To open them again later without rerunning anything, add `ui` at the end:
@@ -74,10 +74,12 @@ a lines sum of 342,791. The report shows one scale factor at a time, so pass the
 | --- | --- | --- |
 | `spark` | Spark only | `BatchScan` → `ColumnarToRow`, then `Filter`, `Project`, `HashAggregate`, `Exchange`, `HashAggregate`, `AppendData` |
 | `comet` | Spark + Comet | Comet operators from scan to write: `CometIcebergNativeScan` … `CometExchange` … `CometIcebergWrite` under `IcebergCommit` |
-| `comet-fallback` | `comet` + a data-quality guard, `assert_true(l_discount BETWEEN 0.00 AND 0.10)` | one `Filter` without the Comet prefix, with `CometColumnarToRow` before it and `CometSparkRowToColumnar` after it |
+| `comet-fallback` | `comet` + a data-quality guard, `assert_true(l_discount BETWEEN 0.00 AND 0.10)`, which Comet does not support | only the scan stays in Comet: `CometIcebergNativeScan` → `CometColumnarToRow`, then Spark's `Filter`, `HashAggregate`, `Exchange`, `HashAggregate` and `IcebergWrite` |
 
-`comet-fallback` shows what one operator that Comet does not run natively costs in the
-middle of a stage. The `comet` run enables Comet's native Iceberg write
+`comet-fallback` shows how far one unsupported expression reaches. Comet runs an
+operator natively only when its input is already native, and turns rows back into Arrow
+only right above a scan, so everything after the guard runs in Spark, including the
+shuffle and the Iceberg write. The `comet` run enables Comet's native Iceberg write
 (`spark.comet.write.iceberg.enabled=true`, off by default in Comet 1.2); if its plan
 shows `IcebergWrite` instead of `CometIcebergWrite`, the native write was not used and
 the EXPLAIN output in the report says why.

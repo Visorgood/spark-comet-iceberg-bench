@@ -9,7 +9,9 @@ source scripts/lib.sh
 mkdir -p "$(out_dir)"
 {
   echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  echo "cpu: $(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}') ($(uname -m))"
+  MODEL="$(lscpu 2>/dev/null | awk -F: '/Model name/ {gsub(/^ +/, "", $2); print $2; exit}')"
+  if [ -z "$MODEL" ] || [ "$MODEL" = "-" ]; then MODEL="model not reported (e.g. Docker Desktop's VM)"; fi
+  echo "cpu: $MODEL, $(uname -m)"
   echo "container limits: $CPUS CPUs, ${MEM_GB} GB memory (CPUs visible: $(nproc))"
   echo "executor: $CORES cores, heap $EXEC_MEM, off-heap $OFFHEAP; driver $DRIVER_MEM"
   echo "iterations per run: $WARMUP warm-up + $ITERATIONS measured"

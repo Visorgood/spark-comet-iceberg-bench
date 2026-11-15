@@ -3,7 +3,9 @@
 
 For each iteration: recreate the empty target table, run the INSERT under a job
 description "<run> <label>" (metrics.py finds it in the event log by that name),
-time it on the driver, then check the result so every run can be compared.
+time it on the driver, measure the CPU time the whole container used meanwhile
+(Comet runs native plans on its own threads, which Spark's task CPU metric misses),
+then check the result so every run can be compared.
 Before the loop it saves EXPLAIN FORMATTED and EXPLAIN EXTENDED of the INSERT.
 """
 import argparse
@@ -19,6 +21,19 @@ def statements(path, **subst):
     text = pathlib.Path(path).read_text().format(**subst)
     lines = [line for line in text.splitlines() if not line.strip().startswith("--")]
     return [s.strip() for s in "\n".join(lines).split(";") if s.strip()]
+
+
+def container_cpu_s():
+    """CPU seconds used so far by every process in this container (cgroup v2), or None."""
+    try:
+        with open("/sys/fs/cgroup/cpu.stat") as f:
+            for line in f:
+                key, value = line.split()
+                if key == "usage_usec":
+                    return int(value) / 1e6
+    except OSError:
+        pass
+    return None
 
 
 def main():
@@ -57,13 +72,15 @@ def main():
         for stmt in create:
             spark.sql(stmt)
         sc.setLocalProperty("spark.job.description", f"{a.run} {label}")
-        t0 = time.perf_counter()
+        cpu0, t0 = container_cpu_s(), time.perf_counter()
         spark.sql(insert)
         wall = time.perf_counter() - t0
+        cpu1 = container_cpu_s()
         sc.setLocalProperty("spark.job.description", None)
         chk = spark.sql(
             f"SELECT count(*) AS n, sum(revenue) AS revenue, sum(lines) AS lines FROM {a.target}").first()
         row = {"run": a.run, "label": label, "wall_s": round(wall, 3),
+               "cpu_s": round(cpu1 - cpu0, 3) if cpu0 is not None and cpu1 is not None else "",
                "out_rows": chk["n"], "sum_revenue": str(chk["revenue"]), "sum_lines": chk["lines"]}
         rows.append(row)
         print(f"[bench] {row}", flush=True)
