@@ -81,7 +81,7 @@ same comparison at a tenth of the size; its numbers differ from the post's.
 | --- | --- | --- |
 | `spark` | Spark only | `BatchScan` → `ColumnarToRow`, then `Filter`, `Project`, `HashAggregate`, `Exchange`, `HashAggregate`, `AppendData` |
 | `comet` | Spark + Comet | Comet operators from scan to write: `CometIcebergNativeScan` … `CometExchange` … `CometIcebergWrite` under `IcebergCommit` |
-| `comet-fallback` | `comet` + a data-quality guard, `assert_true(l_discount BETWEEN 0.00 AND 0.10)`, which Comet does not support | only the scan stays in Comet: `CometIcebergNativeScan` → `CometColumnarToRow`, then Spark's `Filter`, `HashAggregate`, `Exchange`, `HashAggregate` and `IcebergWrite` |
+| `comet-fallback` | `comet` + a data-quality guard in the `WHERE`, `assert_true(l_discount BETWEEN 0.00 AND 0.10) IS NULL`, which Comet does not support | only the scan stays in Comet: `CometIcebergNativeScan` → `CometColumnarToRow`, then Spark's `Filter`, `HashAggregate`, `Exchange`, `HashAggregate` and `IcebergWrite` |
 
 `comet-fallback` shows how far one unsupported expression reaches. Comet runs an
 operator natively only when its input is already native, and turns rows back into Arrow
@@ -109,9 +109,10 @@ application, for the CPU flame graphs in the report. Profiling never touches the
 | Apache Iceberg | 1.11.0 |
 | Apache DataFusion Comet | 1.2.0 |
 | TPC-H generator | `tpchgen-cli` 4.0.0 |
+| async-profiler | 4.5 |
 
-Versions are set at the top of the `Dockerfile`; downloads are checked against their
-published checksums. Eclipse Temurin is the Eclipse Adoptium build of OpenJDK; Docker's
+Versions are set at the top of the `Dockerfile`; the Spark, Iceberg and Comet downloads
+are checked against their published checksums. Eclipse Temurin is the Eclipse Adoptium build of OpenJDK; Docker's
 own `openjdk` image is deprecated. Spark is 4.1 rather than 4.2 because Iceberg has no
 Spark 4.2 runtime yet. Comet's published jars carry native code for Linux on amd64 and
 arm64, so the image runs natively on Apple silicon too.
@@ -136,7 +137,7 @@ In the History Server (http://localhost:18080) each run is an application named
 measured: emptying the target table, the plans, and a result check after every iteration.
 The INSERTs are the queries named `<run> warmup` and `<run> iter1` to `<run> iter5`; the
 warm-up is not counted. Open `<run> iter1`: the graph shows every operator with its metrics, and
-**Details** under it shows the plan as text. The report links straight to these pages.
+**Details** under it shows the plan as text. The report links to the SQL / DataFrame tab of each application.
 The applications named `comet-blog-profile-<run>` are the profiled runs.
 
 ## Files and debugging
