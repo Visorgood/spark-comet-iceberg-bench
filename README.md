@@ -1,7 +1,7 @@
 # spark-comet-iceberg-bench
 
-Reproduction for the blog post *Where Spark loses time, and how Comet gets it back*
-(link added on publication).
+Reproduction for the blog post
+[Where Spark loses time, and how Comet gets it back](https://viacheslavinozemtsev.io/blog-posts/where-spark-loses-time-and-how-comet-gets-it-back).
 
 The post follows one ordinary ETL step – read an Iceberg table, filter, compute, group by
 a key, write an Iceberg table – through Apache Spark alone and through Spark with
