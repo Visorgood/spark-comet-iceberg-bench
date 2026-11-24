@@ -6,8 +6,9 @@ Reproduction for the blog post
 The post follows one ordinary ETL step – read an Iceberg table, filter, compute, group by
 a key, write an Iceberg table – through Apache Spark alone and through Spark with
 [Apache DataFusion Comet](https://github.com/apache/datafusion-comet). This repository
-runs that step both ways inside one Docker container and shows the wall time, task
-metrics, physical plans and the Spark UI of each run.
+runs that step with Spark alone and with Comet in three configurations, inside one
+Docker container, and shows the wall time, task metrics, physical plans and the Spark UI
+of each run.
 
 ```sql
 INSERT INTO lake.tpch.order_revenue
@@ -80,16 +81,20 @@ same comparison at a tenth of the size; its numbers differ from the post's.
 | Run | Configuration | What to look for in the plan |
 | --- | --- | --- |
 | `spark` | Spark only | `BatchScan` → `ColumnarToRow`, then `Filter`, `Project`, `HashAggregate`, `Exchange`, `HashAggregate`, `AppendData` |
-| `comet` | Spark + Comet | Comet operators from scan to write: `CometIcebergNativeScan` … `CometExchange` … `CometIcebergWrite` under `IcebergCommit` |
+| `comet-default` | Spark + Comet with Comet's default settings | Comet operators from the scan to the final aggregate, then `CometColumnarToRow` → `AppendData`: iceberg-java writes the files |
+| `comet` | Spark + Comet with its native Iceberg write (`spark.comet.write.iceberg.enabled=true`) | Comet operators from scan to write: `CometIcebergNativeScan` … `CometExchange` … `CometIcebergWrite` under `IcebergCommit` |
 | `comet-fallback` | `comet` + a data-quality guard in the `WHERE`, `assert_true(l_discount BETWEEN 0.00 AND 0.10) IS NULL`, which Comet does not support | only the scan stays in Comet: `CometIcebergNativeScan` → `CometColumnarToRow`, then Spark's `Filter`, `HashAggregate`, `Exchange`, `HashAggregate` and `IcebergWrite` |
 
 `comet-fallback` shows how far one unsupported expression reaches. Comet runs an
 operator natively only when its input is already native, and turns rows back into Arrow
 only right above a scan, so everything after the guard runs in Spark, including the
-shuffle and the Iceberg write. The `comet` run enables Comet's native Iceberg write
-(`spark.comet.write.iceberg.enabled=true`, off by default in Comet 1.2); if its plan
-shows `IcebergWrite` instead of `CometIcebergWrite`, the native write was not used and
-the EXPLAIN output in the report says why.
+shuffle and the Iceberg write.
+
+`comet-default` is Comet as it comes out of the box. The `comet` and `comet-fallback`
+runs also enable Comet's native Iceberg write
+(`spark.comet.write.iceberg.enabled=true`, off by default in Comet 1.2); if the `comet`
+plan shows `IcebergWrite` instead of `CometIcebergWrite`, the native write was not used
+and the EXPLAIN output in the report says why.
 
 Each run is one Spark application with one warm-up and five measured iterations; the
 report shows the median wall time and the fastest and slowest iteration. All runs share

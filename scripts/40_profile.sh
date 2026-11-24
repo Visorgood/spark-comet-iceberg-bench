@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # CPU flame graph of the executor for one configuration, in a separate Spark application, so
 # the timed runs are never profiled.
-#   bash scripts/40_profile.sh spark|comet|comet-fallback
+#   bash scripts/40_profile.sh spark|comet-default|comet|comet-fallback
 # async-profiler runs as an agent in the executor JVM. The itimer engine samples the whole
 # process without extra container privileges, so Comet's native threads are in the graph too.
 # The graph is written when the executor exits: $OUT_DIR/sf$SCALE/profiles/<run>/flame-<pid>.html
@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 source ./env.sh
 source scripts/lib.sh
 
-RUN="${1:?usage: $0 spark|comet|comet-fallback}"
+RUN="${1:?usage: $0 spark|comet-default|comet|comet-fallback}"
 OUT="$(out_dir)/profiles/$RUN"
 LIB="$ASPROF_HOME/lib/libasyncProfiler.so"
 [ -f "$LIB" ] || { echo "async-profiler not found in $ASPROF_HOME" >&2; exit 1; }

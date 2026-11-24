@@ -32,6 +32,7 @@ base_args() {
   )
 }
 
+# Comet with its default settings. The two explain settings only add diagnostics.
 comet_args() {
   if [ ! -f "$COMET_JAR" ]; then
     echo "Comet jar not found at $COMET_JAR" >&2
@@ -43,10 +44,14 @@ comet_args() {
     --conf "spark.executor.extraClassPath=$COMET_JAR"
     --conf spark.plugins=org.apache.spark.CometPlugin
     --conf spark.shuffle.manager=org.apache.spark.sql.comet.execution.shuffle.CometShuffleManager
-    --conf spark.comet.write.iceberg.enabled=true
     --conf spark.comet.explain.fallback.enabled=true
     --conf spark.sql.extendedExplainProviders=org.apache.comet.ExtendedExplainInfo
   )
+}
+
+# Comet's native Iceberg write, off by default in Comet 1.2.
+native_write_args() {
+  ARGS+=(--conf spark.comet.write.iceberg.enabled=true)
 }
 
 # Sets ARGS and QUERY for one run. See README, "What runs".
@@ -55,9 +60,12 @@ run_args() {
   QUERY="$BENCH_ROOT/sql/insert.sql"
   case "$1" in
     spark)          ;;
-    comet)          comet_args || return 1 ;;
+    comet-default)  comet_args || return 1 ;;
+    comet)          comet_args || return 1
+                    native_write_args ;;
     comet-fallback) comet_args || return 1
+                    native_write_args
                     QUERY="$BENCH_ROOT/sql/insert_breaker.sql" ;;
-    *) echo "Unknown run: $1 (use spark, comet or comet-fallback)" >&2; return 1 ;;
+    *) echo "Unknown run: $1 (use spark, comet-default, comet or comet-fallback)" >&2; return 1 ;;
   esac
 }

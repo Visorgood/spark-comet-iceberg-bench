@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Runs one configuration: warm-up + measured iterations in one Spark application.
-#   bash scripts/10_run.sh spark|comet|comet-fallback
+#   bash scripts/10_run.sh spark|comet-default|comet|comet-fallback
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source ./env.sh
 source scripts/lib.sh
 
-RUN="${1:?usage: $0 spark|comet|comet-fallback}"
+RUN="${1:?usage: $0 spark|comet-default|comet|comet-fallback}"
 OUT="$(out_dir)/$RUN"
 mkdir -p "$OUT"
 run_args "$RUN"

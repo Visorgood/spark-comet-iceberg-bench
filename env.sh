@@ -13,7 +13,7 @@ export OUT_DIR="$WORK/out"              # per-run outputs: timings, metrics, pla
 export REPORT_DIR="$WORK/report"        # the HTML report served on port 8000
 
 export SCALE="${SCALE:-100}"            # TPC-H scale factor
-export RUNS="spark comet comet-fallback"
+export RUNS="spark comet-default comet comet-fallback"
 export WARMUP=1
 export ITERATIONS=5
 

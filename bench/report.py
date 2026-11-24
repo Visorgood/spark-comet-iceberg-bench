@@ -14,10 +14,12 @@ import shutil
 
 RUNS = {
     "spark": "Spark only",
-    "comet": "Spark + Comet: native Iceberg scan, operators, shuffle and Iceberg write",
+    "comet-default": "Spark + Comet with Comet's default settings: iceberg-java writes the Iceberg files",
+    "comet": "Spark + Comet with the native Iceberg write: native Iceberg scan, operators, shuffle and Iceberg write",
     "comet-fallback": "As comet, plus a data-quality guard (assert_true) that Comet does not support",
 }
 COMPARISONS = [("spark", "comet", "Spark vs Spark + Comet"),
+               ("comet-default", "comet", "Comet with its default settings and with the native Iceberg write"),
                ("comet", "comet-fallback", "Comet without and with one expression it does not support")]
 CSS = """
 body{font:14px/1.45 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;margin:24px auto;max-width:1200px;padding:0 16px;color:#1f2328}
