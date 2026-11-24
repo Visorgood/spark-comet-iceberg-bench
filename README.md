@@ -85,10 +85,13 @@ same comparison at a tenth of the size; its numbers differ from the post's.
 | `comet` | Spark + Comet with its native Iceberg write (`spark.comet.write.iceberg.enabled=true`) | Comet operators from scan to write: `CometIcebergNativeScan` … `CometExchange` … `CometIcebergWrite` under `IcebergCommit` |
 | `comet-fallback` | `comet` + a data-quality guard in the `WHERE`, `assert_true(l_discount BETWEEN 0.00 AND 0.10) IS NULL`, which Comet does not support | only the scan stays in Comet: `CometIcebergNativeScan` → `CometColumnarToRow`, then Spark's `Filter`, `HashAggregate`, `Exchange`, `HashAggregate` and `IcebergWrite` |
 
-`comet-fallback` shows how far one unsupported expression reaches. Comet runs an
-operator natively only when its input is already native, and turns rows back into Arrow
-only right above a scan, so everything after the guard runs in Spark, including the
-shuffle and the Iceberg write.
+`comet-fallback` shows how far one unsupported expression reaches. Within a stage, Comet
+runs an operator natively only when its input is already native, and by default it turns
+rows back into Arrow only right above a scan, so everything in the stage after the guard
+runs in Spark. Here the rest of the job stays in Spark too: Comet does not run a final
+aggregate with a decimal `sum` or a `count` on top of Spark's partial one, it then reverts
+the shuffle between the two Spark aggregates to Spark's, and the native Iceberg write
+needs native input. The driver log of the run names each reason.
 
 `comet-default` is Comet as it comes out of the box. The `comet` and `comet-fallback`
 runs also enable Comet's native Iceberg write
