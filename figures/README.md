@@ -53,7 +53,8 @@ SQL / DataFrame tab, the query with the description `<run> iter1` (the first tim
 ## Flame graphs (7, 8)
 
 `40_profile.sh` writes them to `out/sf100/profiles/<run>/flame-<pid>.html` in the `spark-comet-iceberg-bench`
-volume. The HTML here is that file; the PNG is a screenshot of its full view in a browser.
+volume. The HTML here is that file; the PNG is a screenshot of its full view in a browser, with a band added underneath
+that labels the regions the blog post describes. The label positions come from the frame widths in the HTML.
 
 ## After a new Comet release
 
